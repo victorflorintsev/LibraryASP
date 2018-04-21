@@ -58,15 +58,28 @@ namespace Library
                     cmd2.Parameters.AddWithValue("@AC", TextBox8.Text);
                     cmd2.Parameters.AddWithValue("@AS", TextBox9.Text);
                     cmd2.Parameters.AddWithValue("@AZ", TextBox10.Text);
-                    cmd2.Parameters.AddWithValue("@CT", TextBox11.Text);
+
+                    string checkcustomertype = "select Customer_Type_ID from LIBDB.CUSTOMER_TYPE where Customer_Type_Name='" + DropDownList1.Text + "'";
+                    SqlCommand query1 = new SqlCommand(checkcustomertype, conn);
+                    int customertype = Convert.ToInt32(query1.ExecuteScalar().ToString());
+                    cmd2.Parameters.AddWithValue("@CT", customertype);
                     cmd2.Parameters.AddWithValue("@Username", TextBox12.Text);
 
                     //Run Querries
                     cmd1.ExecuteNonQuery();
-                    cmd2.ExecuteNonQuery();
+                    try
+                    { cmd2.ExecuteNonQuery(); }
+                    catch (Exception ex)
+                    {
+                        //if there's an error on cmd2, delete the user added 
+                        Response.Write("error" + ex.ToString());
+                        string deleteUser = "delete from LIBDB.USERS where UserName = @Username";
+                        SqlCommand cmd3 = new SqlCommand(deleteUser, conn);
+                        cmd3.Parameters.AddWithValue("@Username", TextBox12.Text);
+                        cmd3.ExecuteNonQuery();
+                    }
 
                     Response.Write("Customer Registration Complete!");
-
                     conn.Close();
                 }
             }
@@ -77,6 +90,8 @@ namespace Library
             }
 
         }
+
+      
     }
 }  
         
